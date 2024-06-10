@@ -1,8 +1,8 @@
 class Withd < Formula
   desc "Run a command in a specific directory or in a temporary directory."
   homepage "https://github.com/allenap/withd"
-  url "https://github.com/allenap/withd/archive/refs/tags/v0.2.3.tar.gz"
-  sha256 "247320969cdcb1f139f55717b2afd347e0811b63640b8bbd99f6b3835cc845c7"
+  url "https://github.com/allenap/withd/archive/refs/tags/v0.3.0.tar.gz"
+  sha256 "4cef2eefea059c190f565f6d01215856a6abc2507e5941cc152b74cf29787d30"
   license "GPL-3.0-or-later"
 
   depends_on "rust" => :build
@@ -11,6 +11,7 @@ class Withd < Formula
 
   def install
     system "cargo", "install", *std_cargo_args
+    bash_completion.install "completions/withd.bash" => "withd"
   end
 
   test do
