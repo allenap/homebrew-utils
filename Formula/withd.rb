@@ -1,8 +1,8 @@
 class Withd < Formula
   desc "Run a command in a specific directory or in a temporary directory."
   homepage "https://github.com/allenap/withd"
-  url "https://github.com/allenap/withd/archive/refs/tags/v0.3.0.tar.gz"
-  sha256 "4cef2eefea059c190f565f6d01215856a6abc2507e5941cc152b74cf29787d30"
+  url "https://github.com/allenap/withd/archive/refs/tags/v0.3.1.tar.gz"
+  sha256 "951f563f9bd6d999f011f4cd08b8cea11183d904fef472a3b39eb6038c6862a9"
   license "GPL-3.0-or-later"
 
   depends_on "rust" => :build

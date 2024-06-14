@@ -3,15 +3,15 @@
 Compromising things I've written that I personally find useful, packaged for
 installation using [HomeBrew](https://brew.sh), including:
 
+- [rust-petname](https://github.com/allenap/rust-petname): Generate human
+  readable random names.
+
 - [withd](https://github.com/allenap/withd): A simple utility for running
   commands with a modified working directory.
 
-- (COMING SOON) [unison-confgen](https://github.com/allenap/unison-confgen):
-  This helps me generate my [Unison](https://github.com/bcpierce00/unison)
-  configuration files.
-
-- (COMING SOON) [rust-petname](https://github.com/allenap/rust-petname):
-  Generate human readable random names.
+- [unison-confgen](https://github.com/allenap/unison-confgen): This helps me
+  generate my [Unison](https://github.com/bcpierce00/unison) configuration
+  files.
 
 ## How do I install these formulae?
 
