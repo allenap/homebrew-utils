@@ -29,3 +29,7 @@ brew "<formula>"
 ## Documentation
 
 `brew help`, `man brew` or check [Homebrew's documentation](https://docs.brew.sh).
+
+## How do I update these formulae?
+
+See [DEVELOP](DEVELOP.md).
