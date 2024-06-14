@@ -6,6 +6,13 @@ class Withd < Formula
   license "GPL-3.0-or-later"
 
   head "https://github.com/allenap/withd.git", branch: "master"
+
+  bottle do
+    root_url "https://ghcr.io/v2/allenap/utils"
+    rebuild 1
+    sha256 cellar: :any_skip_relocation, ventura:      "781ef3f4bb4ebe38635889ff9b72ebbd542295123154bed12669b9bfc780943e"
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "329a64d71ddf28b3059678c0a6c565f45292dc573d05e63f9117af0d7bcbbb9e"
+  end
   depends_on "rust" => :build
 
   def install
