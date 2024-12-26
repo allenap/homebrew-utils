@@ -9,9 +9,8 @@ class Withd < Formula
 
   bottle do
     root_url "https://ghcr.io/v2/allenap/utils"
-    rebuild 1
-    sha256 cellar: :any_skip_relocation, ventura:      "781ef3f4bb4ebe38635889ff9b72ebbd542295123154bed12669b9bfc780943e"
-    sha256 cellar: :any_skip_relocation, x86_64_linux: "329a64d71ddf28b3059678c0a6c565f45292dc573d05e63f9117af0d7bcbbb9e"
+    sha256 cellar: :any_skip_relocation, ventura:      "e7f128c85d0aa3c3f32dcf899cb2716e918d4dbfa147d74844921970f9865b73"
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "12eff5451fa1ae931a446c3db3406ac2705336787dd52de05fe9a166c6932a84"
   end
   depends_on "rust" => :build
 
