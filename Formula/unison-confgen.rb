@@ -7,6 +7,11 @@ class UnisonConfgen < Formula
 
   head "https://github.com/allenap/unison-confgen.git", branch: "master"
 
+  livecheck do
+    url :stable
+    regex(/^v(\d+(?:\.\d+)+)$/i)
+  end
+
   bottle do
     root_url "https://ghcr.io/v2/allenap/utils"
     sha256 cellar: :any_skip_relocation, arm64_tahoe:  "cea8118c8a9a60a0b307c7c2cefe9eab286e94227b635e2b04cb8db9a3819e79"

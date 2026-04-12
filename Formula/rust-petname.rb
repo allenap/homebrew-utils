@@ -7,6 +7,11 @@ class RustPetname < Formula
 
   head "https://github.com/allenap/rust-petname.git", branch: "master"
 
+  livecheck do
+    url :stable
+    regex(/^v(\d+(?:\.\d+)+)$/i)
+  end
+
   bottle do
     root_url "https://ghcr.io/v2/allenap/utils"
     sha256 cellar: :any_skip_relocation, arm64_tahoe:  "7fed414ba5309177b61eea996b1ffbf5b484aa100f724ba2d24a24c946809363"
