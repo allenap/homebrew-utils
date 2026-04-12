@@ -1,6 +1,6 @@
 class RustPetname < Formula
   desc "Generate human readable random names"
-  homepage "https://crates.io/crates/petname"
+  homepage "https://github.com/allenap/rust-petname"
   url "https://github.com/allenap/rust-petname/archive/refs/tags/v3.0.0.tar.gz"
   sha256 "0ca900689f19eae09af866d3736144e70eb2b2e0c722e2d139f92f753a24e767"
   license "Apache-2.0"
