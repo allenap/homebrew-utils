@@ -9,9 +9,8 @@ class UnisonConfgen < Formula
 
   bottle do
     root_url "https://ghcr.io/v2/allenap/utils"
-    rebuild 1
-    sha256 cellar: :any_skip_relocation, ventura:      "4fbd8344fe47816ad9eb741ad7531405d92fc44dde2b1bbbd4e7e08d60176685"
-    sha256 cellar: :any_skip_relocation, x86_64_linux: "4bb89a77a3e40e687e60dad22bd7ba6c8d6adce88c0f83258b9954260fd576db"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:  "cea8118c8a9a60a0b307c7c2cefe9eab286e94227b635e2b04cb8db9a3819e79"
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "5c4a9a3106a451817c5a19aa87fbdfbab31ee9738170cfbf70943adf4e5b94d4"
   end
   depends_on "rust" => :build
 
