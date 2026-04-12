@@ -9,9 +9,8 @@ class RustPetname < Formula
 
   bottle do
     root_url "https://ghcr.io/v2/allenap/utils"
-    rebuild 1
-    sha256 cellar: :any_skip_relocation, ventura:      "158e882edc8172b4a3839e8b7ec9638a194b84615e9088aa03129d5ea6a3a0cc"
-    sha256 cellar: :any_skip_relocation, x86_64_linux: "df5c135ee5b460f5e7a02d8ac7078c997308d0be5bf55619141a2660e1d8a1d9"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:  "7fed414ba5309177b61eea996b1ffbf5b484aa100f724ba2d24a24c946809363"
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "98baa12f59094cba836ecb8cf8548ea2b3f1a269adb8d339d550604ab6f5c4be"
   end
   depends_on "rust" => :build
 
