@@ -1,0 +1,37 @@
+name: brew livecheck
+
+on:
+  schedule:
+    - cron: '0 9 * * 1'  # Weekly on Mondays at 09:00 UTC
+  workflow_dispatch:
+
+jobs:
+  livecheck:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Set up Homebrew
+        uses: Homebrew/actions/setup-homebrew@main
+
+      - name: Set up git
+        uses: Homebrew/actions/git-user-config@main
+
+      - name: Bump outdated formulae
+        env:
+          HOMEBREW_GITHUB_API_TOKEN: ${{ github.token }}
+        run: |
+          brew livecheck \
+            --tap "$GITHUB_REPOSITORY" \
+            --newer-only \
+            --quiet \
+            --json \
+          | jq -r '.[].formula' \
+          | while read -r formula; do
+              brew bump-formula-pr \
+                --no-browse \
+                --no-fork \
+                "$formula" \
+              || true
+            done

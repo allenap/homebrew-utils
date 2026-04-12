@@ -7,6 +7,11 @@ class Withd < Formula
 
   head "https://github.com/allenap/withd.git", branch: "master"
 
+  livecheck do
+    url :stable
+    regex(/^v(\d+(?:\.\d+)+)$/i)
+  end
+
   bottle do
     root_url "https://ghcr.io/v2/allenap/utils"
     sha256 cellar: :any_skip_relocation, ventura:      "e7f128c85d0aa3c3f32dcf899cb2716e918d4dbfa147d74844921970f9865b73"
