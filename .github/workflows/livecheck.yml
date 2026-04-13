@@ -2,7 +2,7 @@ name: brew livecheck
 
 on:
   schedule:
-    - cron: '0 9 * * 1'  # Weekly on Mondays at 09:00 UTC
+    - cron: "0 9 * * 1" # Weekly on Mondays at 09:00 UTC
   workflow_dispatch:
 
 jobs:
@@ -44,7 +44,10 @@ jobs:
                   fi
 
                   echo "Deleting stale remote branch $branch before bumping $formula to $version"
-                  git push --delete origin "$branch"
+                  curl --silent --show-error --fail --request DELETE \
+                    --header "Authorization: Bearer $GITHUB_TOKEN" \
+                    --header "Accept: application/vnd.github+json" \
+                    "https://api.github.com/repos/$GITHUB_REPOSITORY/git/refs/heads/$branch"
                 fi
 
                 brew bump-formula-pr --no-browse --no-fork --version "$version" "$formula" || true
