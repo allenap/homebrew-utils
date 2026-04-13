@@ -1,8 +1,8 @@
 class Withd < Formula
   desc "Run a command in a specific (maybe temporary) directory"
   homepage "https://github.com/allenap/withd"
-  url "https://github.com/allenap/withd/archive/refs/tags/v0.3.2.tar.gz"
-  sha256 "1ffd3e813c2f3365ac66d4bae1f5905bbd2359ace847d679d793444c02314fa0"
+  url "https://github.com/allenap/withd/archive/refs/tags/v0.3.3.tar.gz"
+  sha256 "b3eeffe7079900461f8a659b698f326fdb14b8b60e0b08bc302c1486a1d74e21"
   license "GPL-3.0-or-later"
 
   head "https://github.com/allenap/withd.git", branch: "master"
