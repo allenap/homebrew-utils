@@ -27,11 +27,12 @@ jobs:
             --newer-only \
             --quiet \
             --json \
-          | jq -r '.[].formula' \
-          | while read -r formula; do
+          | jq -r '.[] | .formula + "\t" + .version.latest' \
+          | while IFS=$'\t' read -r formula version; do
               brew bump-formula-pr \
                 --no-browse \
                 --no-fork \
+                --version "$version" \
                 "$formula" \
               || true
             done
