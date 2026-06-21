@@ -1,6 +1,6 @@
 # Allenap's utilities for HomeBrew
 
-Compromising things I've written that I personally find useful, packaged for
+Comprising things I've written that I personally find useful, packaged for
 installation using [HomeBrew](https://brew.sh), including:
 
 - [rust-petname](https://github.com/allenap/rust-petname): Generate human
