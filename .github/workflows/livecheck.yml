@@ -38,7 +38,7 @@ jobs:
                     | jq 'length'
                   )"
 
-                  if [ "$open_pr_count" -gt 0 ]; then
+                  if [ "${open_pr_count:-0}" -gt 0 ]; then
                     echo "Skipping $formula $version: open PR already exists for $branch"
                     continue
                   fi
