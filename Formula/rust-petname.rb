@@ -1,8 +1,8 @@
 class RustPetname < Formula
   desc "Generate human readable random names"
   homepage "https://github.com/allenap/rust-petname"
-  url "https://github.com/allenap/rust-petname/archive/refs/tags/v3.0.0.tar.gz"
-  sha256 "0ca900689f19eae09af866d3736144e70eb2b2e0c722e2d139f92f753a24e767"
+  url "https://github.com/allenap/rust-petname/archive/refs/tags/v3.0.1.tar.gz"
+  sha256 "57dbb72d3e70ef275eea1a477a9f2170835d0f4f22afb6160ae4ec5cf42ad759"
   license "Apache-2.0"
 
   head "https://github.com/allenap/rust-petname.git", branch: "master"
