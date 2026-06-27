@@ -42,10 +42,27 @@ The new SHA-256 checksum is now in your clipboard. Next:
 - Update the `url` and `sha256` fields in the formula.
 - Commit the changes, push the branch, and open a new PR.
 - Wait for CI to pass – or, at least, yield errors that you can fix or ignore.
-- Merge the PR **by setting the _pr-pull_ label**.
-  - This ^^^^ bit is important, because it triggers the release workflow which
-    inserts/updates the `bottle` stanzas in the formulas.
-
-Your branch will be deleted.
+- Merging and bottle publishing are automatic for version bumps:
+  - **Automated bumps** opened by the `livecheck` workflow use a `bump-*`
+    branch. Once CI passes, the release workflow pulls the freshly-built bottles,
+    inserts/updates the `bottle` stanzas, pushes to `master`, closes the PR, and
+    deletes the branch. There is nothing to remember and no label to set.
+  - **Manual bumps**: name your branch `bump-<formula>-<version>` to get the same
+    automatic handling, or apply the _pr-pull_ label to the PR to trigger the
+    release workflow before merging.
 
 That's all; that should be it.
+
+### Recovery: if bottles didn't get published
+
+If a PR was merged without the release workflow running – e.g. it was merged with
+the button on a branch not named `bump-*` – the bottles may have been built but
+never pushed to ghcr, and `brew install` will then 404 on the missing bottle. To
+recover:
+
+1. Go to **Actions → brew pr-pull → Run workflow**.
+2. Enter the PR number and click **Run workflow**.
+
+This re-runs `brew pr-pull` for that PR, pulling the already-built bottle
+artifacts (CI keeps them for 90 days) and pushing the updated formula to
+`master`.

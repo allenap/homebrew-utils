@@ -1,13 +1,45 @@
 name: brew pr-pull
 
 on:
+  # Automatic path: when the test-bot finishes building bottles for an autobump
+  # PR (branch `bump-*`), pull those bottles, push them to ghcr, commit the
+  # updated `bottle do` block, and merge. No label or manual step required.
+  #
+  # This uses `workflow_run` (not the `labeled` event) on purpose: a label added
+  # by the default GITHUB_TOKEN does not trigger a `labeled` workflow, so an
+  # auto-label approach would need a PAT, which expires and reintroduces silent
+  # breakage. `workflow_run` needs no extra credential.
+  workflow_run:
+    workflows: ["brew test-bot"]
+    types:
+      - completed
+
+  # Manual fallback: publish bottles for a specific PR number. Useful to recover
+  # a bump whose bottles were built but never pulled (e.g. a PR that was merged
+  # with the button instead of going through this workflow).
+  workflow_dispatch:
+    inputs:
+      pull_request:
+        description: PR number to pull bottles from
+        required: true
+
+  # Legacy/manual escape hatch: still honour a `pr-pull` label on a PR.
   pull_request_target:
     types:
       - labeled
 
 jobs:
   pr-pull:
-    if: contains(github.event.pull_request.labels.*.name, 'pr-pull')
+    # Run for: a successful test-bot run on an autobump PR; a manual dispatch; or
+    # a PR explicitly labelled `pr-pull`.
+    if: >-
+      (github.event_name == 'workflow_run' &&
+       github.event.workflow_run.event == 'pull_request' &&
+       github.event.workflow_run.conclusion == 'success' &&
+       startsWith(github.event.workflow_run.head_branch, 'bump-')) ||
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'pull_request_target' &&
+       contains(github.event.pull_request.labels.*.name, 'pr-pull'))
     runs-on: ubuntu-24.04
     permissions:
       contents: write
@@ -20,12 +52,41 @@ jobs:
       - name: Set up git
         uses: Homebrew/actions/git-user-config@main
 
+      - name: Determine PR number
+        id: pr
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT_NAME: ${{ github.event_name }}
+          DISPATCH_PR: ${{ github.event.inputs.pull_request }}
+          PR_TARGET_NUMBER: ${{ github.event.pull_request.number }}
+          # Populated for same-repo PRs; fall back to a branch lookup if not.
+          RUN_PR_NUMBER: ${{ github.event.workflow_run.pull_requests[0].number }}
+          RUN_HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+        run: |
+          set -euo pipefail
+          case "$EVENT_NAME" in
+            workflow_dispatch) number="$DISPATCH_PR" ;;
+            pull_request_target) number="$PR_TARGET_NUMBER" ;;
+            workflow_run)
+              number="$RUN_PR_NUMBER"
+              if [ -z "$number" ] || [ "$number" = "null" ]; then
+                number="$(gh pr list --repo "$GITHUB_REPOSITORY" \
+                  --head "$RUN_HEAD_BRANCH" --state all --json number --jq '.[0].number // empty')"
+              fi
+              ;;
+          esac
+          if [ -z "${number:-}" ]; then
+            echo "Could not determine a PR number; nothing to do." >&2
+            exit 1
+          fi
+          echo "number=$number" >> "$GITHUB_OUTPUT"
+
       - name: Pull bottles
         env:
           HOMEBREW_GITHUB_API_TOKEN: ${{ github.token }}
           HOMEBREW_GITHUB_PACKAGES_TOKEN: ${{ github.token }}
           HOMEBREW_GITHUB_PACKAGES_USER: ${{ github.repository_owner }}
-          PULL_REQUEST: ${{ github.event.pull_request.number }}
+          PULL_REQUEST: ${{ steps.pr.outputs.number }}
         run: brew pr-pull --debug --tap="$GITHUB_REPOSITORY" "$PULL_REQUEST"
 
       - name: Push commits
@@ -35,7 +96,7 @@ jobs:
           branch: master
 
       - name: Delete branch
-        if: github.event.pull_request.head.repo.fork == false
+        if: github.event_name != 'workflow_dispatch'
         env:
-          BRANCH: ${{ github.event.pull_request.head.ref }}
-        run: git push --delete origin "$BRANCH"
+          BRANCH: ${{ github.event.workflow_run.head_branch || github.event.pull_request.head.ref }}
+        run: git push --delete origin "$BRANCH" || true
