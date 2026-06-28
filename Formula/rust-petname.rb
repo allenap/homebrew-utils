@@ -1,10 +1,9 @@
 class RustPetname < Formula
   desc "Generate human readable random names"
   homepage "https://github.com/allenap/rust-petname"
-  url "https://github.com/allenap/rust-petname/archive/refs/tags/v3.0.1.tar.gz"
-  sha256 "57dbb72d3e70ef275eea1a477a9f2170835d0f4f22afb6160ae4ec5cf42ad759"
+  url "https://github.com/allenap/rust-petname/archive/refs/tags/v3.1.0.tar.gz"
+  sha256 "ac72beba2e8e5272ab58609de84f1f50f7474d978fddff78d1724218ea354516"
   license "Apache-2.0"
-  revision 1
 
   head "https://github.com/allenap/rust-petname.git", branch: "master"
 
@@ -13,16 +12,11 @@ class RustPetname < Formula
     regex(/^v(\d+(?:\.\d+)+)$/i)
   end
 
-  bottle do
-    root_url "https://ghcr.io/v2/allenap/utils"
-    sha256 cellar: :any_skip_relocation, arm64_tahoe:  "e9f4ee02b92efe95d22dc11d49c7f6306f93024c439b2345c453f7d41613742d"
-    sha256 cellar: :any,                 x86_64_linux: "e169130bb9eb1c2bb6f14395f06be1ec8f07dda17aec606e33329b6e0910f233"
-  end
-
   depends_on "rust" => :build
 
   def install
     system "cargo", "install", *std_cargo_args, "--all-features"
+    generate_completions_from_executable(bin/"petname", "completions")
   end
 
   test do
