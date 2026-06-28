@@ -12,6 +12,12 @@ class RustPetname < Formula
     regex(/^v(\d+(?:\.\d+)+)$/i)
   end
 
+  bottle do
+    root_url "https://ghcr.io/v2/allenap/utils"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:  "9a721db95a28c231256c1d9b7881eeb34d6b0652b3561c4a26a08382982195aa"
+    sha256 cellar: :any,                 x86_64_linux: "a5cce620cbbbdb3f77aaa84bfefa5e0df8ce1b6020b399b09308146bf8e3bafd"
+  end
+
   depends_on "rust" => :build
 
   def install
