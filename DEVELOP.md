@@ -44,12 +44,22 @@ The new SHA-256 checksum is now in your clipboard. Next:
 - Wait for CI to pass – or, at least, yield errors that you can fix or ignore.
 - Merging and bottle publishing are automatic for version bumps:
   - **Automated bumps** opened by the `livecheck` workflow use a `bump-*`
-    branch. Once CI passes, the release workflow pulls the freshly-built bottles,
-    inserts/updates the `bottle` stanzas, pushes to `master`, closes the PR, and
-    deletes the branch. There is nothing to remember and no label to set.
+    branch. Once the bottles are built, _brew test-bot_ dispatches _brew pr-pull_
+    itself, which pulls the freshly-built bottles, inserts/updates the `bottle`
+    stanzas, pushes to `master`, closes the PR, and deletes the branch. There is
+    nothing to remember and no label to set.
   - **Manual bumps**: name your branch `bump-<formula>-<version>` to get the same
     automatic handling, or apply the _pr-pull_ label to the PR to trigger the
     release workflow before merging.
+
+One wrinkle worth knowing, because it will bite again elsewhere: the PR that
+`livecheck` opens does not start further workflows by itself. Events raised by
+the default `GITHUB_TOKEN` are suppressed, so that workflows cannot set each
+other off endlessly, and `workflow_dispatch` and `repository_dispatch` are the
+only exceptions to that. It is why _brew pr-pull_ is now dispatched explicitly
+rather than hung off a `workflow_run` or a label – both of which are suppressed,
+and silently. It is probably also why you have to press **Approve and run** on
+the test-bot run for an automated bump; once you do, the rest follows on its own.
 
 That's all; that should be it.
 
