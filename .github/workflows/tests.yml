@@ -39,3 +39,29 @@ jobs:
         with:
           name: bottles_${{ matrix.os }}
           path: '*.bottle.*'
+
+  # Ask `brew pr-pull` to publish the bottles this run just built.
+  #
+  # This is a `workflow_dispatch` on purpose. Events raised by the default
+  # GITHUB_TOKEN do not start new workflow runs — GitHub's guard against
+  # recursion — and `workflow_dispatch` and `repository_dispatch` are its only
+  # exceptions. The bump PRs are opened by the `livecheck` workflow using that
+  # same token, so everything downstream of them is suppressed, `workflow_run`
+  # included. Dispatching explicitly steps outside the guard, and needs no PAT
+  # to do it.
+  dispatch-pr-pull:
+    name: Publish bottles
+    needs: test-bot
+    if: github.event_name == 'pull_request' && startsWith(github.head_ref, 'bump-')
+    runs-on: ubuntu-24.04
+    permissions:
+      actions: write
+    steps:
+      - name: Dispatch `brew pr-pull`
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PULL_REQUEST: ${{ github.event.pull_request.number }}
+        run: |
+          gh workflow run publish.yml \
+            --repo "$GITHUB_REPOSITORY" \
+            --field pull_request="$PULL_REQUEST"

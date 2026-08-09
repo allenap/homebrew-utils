@@ -1,22 +1,19 @@
 name: brew pr-pull
 
 on:
-  # Automatic path: when the test-bot finishes building bottles for an autobump
-  # PR (branch `bump-*`), pull those bottles, push them to ghcr, commit the
-  # updated `bottle do` block, and merge. No label or manual step required.
+  # The normal path, and also the manual one: publish the bottles built for a
+  # given PR, push them to ghcr, commit the updated `bottle do` block, and merge.
+  # The `brew test-bot` workflow dispatches this itself once it has built bottles
+  # for a `bump-*` branch, so a release needs no label and no manual step; supply
+  # the number by hand to recover a bump whose bottles were built but never
+  # pulled.
   #
-  # This uses `workflow_run` (not the `labeled` event) on purpose: a label added
-  # by the default GITHUB_TOKEN does not trigger a `labeled` workflow, so an
-  # auto-label approach would need a PAT, which expires and reintroduces silent
-  # breakage. `workflow_run` needs no extra credential.
-  workflow_run:
-    workflows: ["brew test-bot"]
-    types:
-      - completed
-
-  # Manual fallback: publish bottles for a specific PR number. Useful to recover
-  # a bump whose bottles were built but never pulled (e.g. a PR that was merged
-  # with the button instead of going through this workflow).
+  # A `workflow_run` trigger used to serve the automatic path, but it never fires
+  # for these PRs: `livecheck` opens them with the default GITHUB_TOKEN, and
+  # events raised by that token do not start new workflow runs. That guard is why
+  # the earlier `labeled` approach needed a PAT, and it defeats `workflow_run`
+  # just the same. `workflow_dispatch` is one of its two documented exceptions,
+  # so dispatching is what actually works — with no credential to expire.
   workflow_dispatch:
     inputs:
       pull_request:
@@ -30,13 +27,8 @@ on:
 
 jobs:
   pr-pull:
-    # Run for: a successful test-bot run on an autobump PR; a manual dispatch; or
-    # a PR explicitly labelled `pr-pull`.
+    # Run for a dispatch, or a PR explicitly labelled `pr-pull`.
     if: >-
-      (github.event_name == 'workflow_run' &&
-       github.event.workflow_run.event == 'pull_request' &&
-       github.event.workflow_run.conclusion == 'success' &&
-       startsWith(github.event.workflow_run.head_branch, 'bump-')) ||
       github.event_name == 'workflow_dispatch' ||
       (github.event_name == 'pull_request_target' &&
        contains(github.event.pull_request.labels.*.name, 'pr-pull'))
@@ -52,34 +44,29 @@ jobs:
       - name: Set up git
         uses: Homebrew/actions/git-user-config@main
 
-      - name: Determine PR number
+      - name: Determine PR number and branch
         id: pr
         env:
           GH_TOKEN: ${{ github.token }}
           EVENT_NAME: ${{ github.event_name }}
           DISPATCH_PR: ${{ github.event.inputs.pull_request }}
           PR_TARGET_NUMBER: ${{ github.event.pull_request.number }}
-          # Populated for same-repo PRs; fall back to a branch lookup if not.
-          RUN_PR_NUMBER: ${{ github.event.workflow_run.pull_requests[0].number }}
-          RUN_HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
         run: |
           set -euo pipefail
           case "$EVENT_NAME" in
             workflow_dispatch) number="$DISPATCH_PR" ;;
             pull_request_target) number="$PR_TARGET_NUMBER" ;;
-            workflow_run)
-              number="$RUN_PR_NUMBER"
-              if [ -z "$number" ] || [ "$number" = "null" ]; then
-                number="$(gh pr list --repo "$GITHUB_REPOSITORY" \
-                  --head "$RUN_HEAD_BRANCH" --state all --json number --jq '.[0].number // empty')"
-              fi
-              ;;
           esac
           if [ -z "${number:-}" ]; then
             echo "Could not determine a PR number; nothing to do." >&2
             exit 1
           fi
+          # Look the branch up now, while the PR is still open: `brew pr-pull`
+          # closes it, and the delete step below needs the name.
+          branch="$(gh pr view "$number" --repo "$GITHUB_REPOSITORY" \
+            --json headRefName --jq .headRefName)"
           echo "number=$number" >> "$GITHUB_OUTPUT"
+          echo "branch=$branch" >> "$GITHUB_OUTPUT"
 
       - name: Pull bottles
         env:
@@ -95,8 +82,16 @@ jobs:
           token: ${{ github.token }}
           branch: master
 
+      # Only `bump-*` branches are ours to tidy away. Dispatch is now the normal
+      # path rather than a fallback, so this can no longer skip on that event,
+      # but it must not delete a branch someone is working on if a dispatch is
+      # aimed at an arbitrary PR.
       - name: Delete branch
-        if: github.event_name != 'workflow_dispatch'
         env:
-          BRANCH: ${{ github.event.workflow_run.head_branch || github.event.pull_request.head.ref }}
-        run: git push --delete origin "$BRANCH" || true
+          BRANCH: ${{ steps.pr.outputs.branch }}
+        run: |
+          set -euo pipefail
+          case "$BRANCH" in
+            bump-*) git push --delete origin "$BRANCH" || true ;;
+            *) echo "$BRANCH is not a bump-* branch; leaving it alone." ;;
+          esac
